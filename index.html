@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Timer Modifiable Stylé</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 40px;
+      border-radius: 20px;
+      width: 320px;
+      margin: 40px auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      user-select: none;
+    }
+
+    h2 {
+      margin-bottom: 0.5em;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    input {
+      font-size: 1.5em;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      text-align: center;
+      margin-top: 10px;
+      width: 100px;
+      outline: none;
+      box-shadow: inset 2px 2px 8px rgba(255 255 255 / 0.3);
+      transition: box-shadow 0.3s ease;
+      background: rgba(255 255 255 / 0.15);
+      color: white;
+    }
+    input:focus {
+      box-shadow: inset 2px 2px 12px rgba(255 255 255 / 0.6);
+      background: rgba(255 255 255 / 0.25);
+    }
+
+    button {
+      background-color: #4caf50;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1.2em;
+      margin: 10px 5px;
+      color: white;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 4px 10px rgba(76,175,80,0.6);
+      user-select: none;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #45a049;
+      box-shadow: 0 6px 15px rgba(69,160,73,0.8);
+    }
+
+    button:disabled {
+      background-color: rgba(255,255,255,0.3);
+      cursor: default;
+      box-shadow: none;
+      color: rgba(255,255,255,0.7);
+    }
+
+    #display {
+      font-size: 4em;
+      font-weight: bold;
+      margin-top: 30px;
+      font-family: 'Courier New', Courier, monospace;
+      letter-spacing: 8px;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+      user-select: text;
+    }
+  </style>
+</head>
+<body>
+  <h2>Timer Modifiable</h2>
+  <input id="minutesInput" type="number" min="1" max="120" value="5" aria-label="Minutes à minuter" />
+  <div>
+    <button id="startBtn">Démarrer</button>
+    <button id="pauseBtn" disabled>Pause</button>
+    <button id="resetBtn" disabled>Réinitialiser</button>
+  </div>
+  <div id="display" aria-live="polite" aria-atomic="true">05:00</div>
+
+  <script>
+    let timer;
+    let remainingTime = 0;
+    let isRunning = false;
+
+    const display = document.getElementById('display');
+    const minutesInput = document.getElementById('minutesInput');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function updateDisplay(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      display.textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }
+
+    function tick() {
+      if (remainingTime > 0) {
+        remainingTime--;
+        updateDisplay(remainingTime);
+      } else {
+        clearInterval(timer);
+        alert("⏰ Temps écoulé !");
+        isRunning = false;
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        resetBtn.disabled = false;
+        minutesInput.disabled = false;
+      }
+    }
+
+    startBtn.addEventListener('click', () => {
+      if (isRunning) return;
+      let val = parseInt(minutesInput.value, 10);
+      if (isNaN(val) || val < 1) {
+        alert("Merci d'entrer un nombre valide de minutes (≥ 1).");
+        return;
+      }
+      remainingTime = val * 60;
+      updateDisplay(remainingTime);
+      timer = setInterval(tick, 1000);
+      isRunning = true;
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+      resetBtn.disabled = false;
+      minutesInput.disabled = true;
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      if (!isRunning) return;
+      clearInterval(timer);
+      isRunning = false;
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      minutesInput.disabled = true;
+    });
+
+    resetBtn.addEventListener('click', () => {
+      clearInterval(timer);
+      remainingTime = parseInt(minutesInput.value, 10) * 60;
+      updateDisplay(remainingTime);
+      isRunning = false;
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resetBtn.disabled = true;
+      minutesInput.disabled = false;
+    });
+
+    // Initialise affichage
+    updateDisplay(parseInt(minutesInput.value, 10) * 60);
+  </script>
+</body>
+</html>
