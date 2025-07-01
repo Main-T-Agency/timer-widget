@@ -1,164 +1,503 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Timer Modifiable Stylé</title>
-  <style>
-    body {
-      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
-      color: white;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
-      padding: 40px;
-      border-radius: 20px;
-      width: 320px;
-      margin: 40px auto;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      user-select: none;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    h2 {
-      margin-bottom: 0.5em;
-      text-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            margin: 0;
+        }
 
-    input {
-      font-size: 1.5em;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      text-align: center;
-      margin-top: 10px;
-      width: 100px;
-      outline: none;
-      box-shadow: inset 2px 2px 8px rgba(255 255 255 / 0.3);
-      transition: box-shadow 0.3s ease;
-      background: rgba(255 255 255 / 0.15);
-      color: white;
-    }
-    input:focus {
-      box-shadow: inset 2px 2px 12px rgba(255 255 255 / 0.6);
-      background: rgba(255 255 255 / 0.25);
-    }
+        .widget-container {
+            background: linear-gradient(180deg, #ffb3ba 0%, #ff8a95 100%);
+            border-radius: 25px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.3);
+            text-align: center;
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            min-width: 280px;
+            height: auto;
+            min-height: 380px;
+            overflow: hidden;
+            border: 4px solid #ff6b6b;
+        }
 
-    button {
-      background-color: #4caf50;
-      border: none;
-      padding: 12px 24px;
-      font-size: 1.2em;
-      margin: 10px 5px;
-      color: white;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 4px 10px rgba(76,175,80,0.6);
-      user-select: none;
-    }
+        @media (max-width: 768px) {
+            .widget-container {
+                max-width: 95%;
+                min-width: 260px;
+                padding: 15px;
+                min-height: 360px;
+            }
+        }
 
-    button:hover:not(:disabled) {
-      background-color: #45a049;
-      box-shadow: 0 6px 15px rgba(69,160,73,0.8);
-    }
+        @media (max-width: 480px) {
+            .widget-container {
+                max-width: 98%;
+                min-width: 240px;
+                padding: 12px;
+                min-height: 340px;
+                border-radius: 20px;
+            }
+        }
 
-    button:disabled {
-      background-color: rgba(255,255,255,0.3);
-      cursor: default;
-      box-shadow: none;
-      color: rgba(255,255,255,0.7);
-    }
+        .header {
+            position: relative;
+            z-index: 15;
+            margin-bottom: 15px;
+        }
 
-    #display {
-      font-size: 4em;
-      font-weight: bold;
-      margin-top: 30px;
-      font-family: 'Courier New', Courier, monospace;
-      letter-spacing: 8px;
-      text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
-      user-select: text;
-    }
-  </style>
+        .timer-text {
+            color: #8b0000;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .emoji {
+            font-size: 60px;
+            margin: 8px 0;
+            display: inline-block;
+            animation: bounce 2s ease-in-out infinite;
+            position: relative;
+            z-index: 15;
+        }
+
+        @media (max-width: 480px) {
+            .emoji {
+                font-size: 50px;
+                margin: 5px 0;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-15px);
+            }
+            60% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .time-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            position: relative;
+            z-index: 15;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-label {
+            font-size: 12px;
+            color: #8b0000;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .time-input {
+            width: 55px;
+            height: 40px;
+            border: 3px solid #ff6b6b;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.95);
+            color: #8b0000;
+            outline: none;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+
+        .time-input::-webkit-outer-spin-button,
+        .time-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .time-input:focus {
+            border-color: #ff4757;
+            box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.2);
+            background: white;
+        }
+
+        .time-display {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 12px 25px;
+            margin: 15px 0;
+            font-size: 32px;
+            font-weight: bold;
+            color: #8b0000;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 15;
+            border: 3px solid #ff6b6b;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 480px) {
+            .time-display {
+                font-size: 28px;
+                padding: 10px 20px;
+                margin: 12px 0;
+                letter-spacing: 1px;
+            }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0 12px 0;
+            position: relative;
+            z-index: 15;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 480px) {
+            .controls {
+                gap: 8px;
+                margin: 15px 0 10px 0;
+            }
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 75px;
+        }
+
+        @media (max-width: 480px) {
+            .btn {
+                padding: 8px 14px;
+                font-size: 11px;
+                min-width: 70px;
+            }
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-pause {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .wave-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(to top, #ff6b6b 0%, rgba(255, 107, 107, 0.8) 50%, transparent 100%);
+            border-radius: 50% 50% 0 0;
+            animation: wave 4s ease-in-out infinite;
+        }
+
+        .wave:nth-child(1) {
+            animation-delay: 0s;
+            opacity: 0.7;
+        }
+
+        .wave:nth-child(2) {
+            animation-delay: -1.5s;
+            opacity: 0.5;
+            transform: translateX(20px);
+        }
+
+        .wave:nth-child(3) {
+            animation-delay: -3s;
+            opacity: 0.3;
+            transform: translateX(-20px);
+        }
+
+        @keyframes wave {
+            0%, 100% {
+                transform: translateX(0) translateY(0);
+            }
+            25% {
+                transform: translateX(10px) translateY(-10px);
+            }
+            50% {
+                transform: translateX(-10px) translateY(-5px);
+            }
+            75% {
+                transform: translateX(5px) translateY(-15px);
+            }
+        }
+
+        .decorative-dots {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .dot:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; }
+        .dot:nth-child(2) { top: 25%; right: 20%; animation-delay: 1s; }
+        .dot:nth-child(3) { top: 40%; left: 10%; animation-delay: 2s; }
+        .dot:nth-child(4) { top: 35%; right: 15%; animation-delay: 1.5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); opacity: 0.4; }
+            50% { transform: translateY(-20px); opacity: 0.8; }
+        }
+
+        /* Animation de fin */
+        @keyframes celebrate {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(5deg); }
+            50% { transform: scale(1.05) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(3deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .celebrating {
+            animation: celebrate 0.6s ease-in-out 3;
+        }
+    </style>
 </head>
 <body>
-  <h2>Timer Modifiable</h2>
-  <input id="minutesInput" type="number" min="1" max="120" value="5" aria-label="Minutes à minuter" />
-  <div>
-    <button id="startBtn">Démarrer</button>
-    <button id="pauseBtn" disabled>Pause</button>
-    <button id="resetBtn" disabled>Réinitialiser</button>
-  </div>
-  <div id="display" aria-live="polite" aria-atomic="true">05:00</div>
+    <div class="widget-container" id="widget">
+        <div class="decorative-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        
+        <div class="wave-container">
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+        </div>
+        
+        <div class="header">
+            <div class="timer-text">Temps de pause</div>
+            <div class="emoji" id="emoji">😴</div>
+        </div>
+        
+        <div class="time-inputs">
+            <div class="input-group">
+                <div class="input-label">Min</div>
+                <input type="number" class="time-input" id="minutesInput" min="0" max="59" value="5">
+            </div>
+            <div class="input-group">
+                <div class="input-label">Sec</div>
+                <input type="number" class="time-input" id="secondsInput" min="0" max="59" value="0">
+            </div>
+        </div>
+        
+        <div class="time-display" id="timeDisplay">05:00</div>
+        
+        <div class="controls">
+            <button class="btn btn-start" id="startBtn">Start</button>
+            <button class="btn btn-pause" id="pauseBtn">Pause</button>
+            <button class="btn btn-reset" id="resetBtn">Reset</button>
+        </div>
+    </div>
 
-  <script>
-    let timer;
-    let remainingTime = 0;
-    let isRunning = false;
+    <script>
+        let countdownInterval;
+        let isRunning = false;
+        let totalSeconds = 300;
 
-    const display = document.getElementById('display');
-    const minutesInput = document.getElementById('minutesInput');
-    const startBtn = document.getElementById('startBtn');
-    const pauseBtn = document.getElementById('pauseBtn');
-    const resetBtn = document.getElementById('resetBtn');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const minutesInput = document.getElementById('minutesInput');
+        const secondsInput = document.getElementById('secondsInput');
+        const emoji = document.getElementById('emoji');
+        const widget = document.getElementById('widget');
 
-    function updateDisplay(seconds) {
-      const m = Math.floor(seconds / 60);
-      const s = seconds % 60;
-      display.textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-    }
+        const emojis = {
+            normal: '😴',
+            running: '🔥',
+            paused: '⏸️',
+            finished: '🎉'
+        };
 
-    function tick() {
-      if (remainingTime > 0) {
-        remainingTime--;
-        updateDisplay(remainingTime);
-      } else {
-        clearInterval(timer);
-        alert("⏰ Temps écoulé !");
-        isRunning = false;
-        startBtn.disabled = false;
-        pauseBtn.disabled = true;
-        resetBtn.disabled = false;
-        minutesInput.disabled = false;
-      }
-    }
+        function updateDisplay() {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
 
-    startBtn.addEventListener('click', () => {
-      if (isRunning) return;
-      let val = parseInt(minutesInput.value, 10);
-      if (isNaN(val) || val < 1) {
-        alert("Merci d'entrer un nombre valide de minutes (≥ 1).");
-        return;
-      }
-      remainingTime = val * 60;
-      updateDisplay(remainingTime);
-      timer = setInterval(tick, 1000);
-      isRunning = true;
-      startBtn.disabled = true;
-      pauseBtn.disabled = false;
-      resetBtn.disabled = false;
-      minutesInput.disabled = true;
-    });
+        function updateFromInputs() {
+            if (!isRunning) {
+                const minutes = parseInt(minutesInput.value) || 0;
+                const seconds = parseInt(secondsInput.value) || 0;
+                totalSeconds = minutes * 60 + seconds;
+                updateDisplay();
+            }
+        }
 
-    pauseBtn.addEventListener('click', () => {
-      if (!isRunning) return;
-      clearInterval(timer);
-      isRunning = false;
-      startBtn.disabled = false;
-      pauseBtn.disabled = true;
-      minutesInput.disabled = true;
-    });
+        function startCountdown() {
+            if (!isRunning) {
+                // Ne pas mettre à jour depuis les inputs si on reprend (totalSeconds > 0)
+                if (startBtn.textContent === 'Start') {
+                    updateFromInputs();
+                    if (totalSeconds <= 0) {
+                        alert('Veuillez définir un temps valide !');
+                        return;
+                    }
+                }
+                
+                isRunning = true;
+                emoji.textContent = emojis.running;
+                startBtn.textContent = 'En cours...';
+                startBtn.style.background = 'linear-gradient(135deg, #666, #555)';
+                
+                countdownInterval = setInterval(() => {
+                    if (totalSeconds > 0) {
+                        totalSeconds--;
+                        updateDisplay();
+                        
+                        // Effet d'urgence dans les 10 dernières secondes
+                        if (totalSeconds <= 10 && totalSeconds > 0) {
+                            timeDisplay.style.color = '#ff4757';
+                            timeDisplay.style.animation = 'pulse 1s ease-in-out infinite';
+                        }
+                    } else {
+                        // Fin du countdown
+                        clearInterval(countdownInterval);
+                        isRunning = false;
+                        emoji.textContent = emojis.finished;
+                        startBtn.textContent = 'Start';
+                        startBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                        timeDisplay.style.color = '#8b0000';
+                        timeDisplay.style.animation = 'none';
+                        
+                        // Animation de célébration
+                        widget.classList.add('celebrating');
+                        setTimeout(() => {
+                            widget.classList.remove('celebrating');
+                        }, 2000);
+                    }
+                }, 1000);
+            }
+        }
 
-    resetBtn.addEventListener('click', () => {
-      clearInterval(timer);
-      remainingTime = parseInt(minutesInput.value, 10) * 60;
-      updateDisplay(remainingTime);
-      isRunning = false;
-      startBtn.disabled = false;
-      pauseBtn.disabled = true;
-      resetBtn.disabled = true;
-      minutesInput.disabled = false;
-    });
+        function pauseCountdown() {
+            if (isRunning) {
+                clearInterval(countdownInterval);
+                isRunning = false;
+                emoji.textContent = emojis.paused;
+                startBtn.textContent = 'Reprendre';
+                startBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                timeDisplay.style.color = '#8b0000';
+                timeDisplay.style.animation = 'none';
+            }
+        }
 
-    // Initialise affichage
-    updateDisplay(parseInt(minutesInput.value, 10) * 60);
-  </script>
+        function resetCountdown() {
+            clearInterval(countdownInterval);
+            isRunning = false;
+            emoji.textContent = emojis.normal;
+            startBtn.textContent = 'Start';
+            startBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+            timeDisplay.style.color = '#8b0000';
+            timeDisplay.style.animation = 'none';
+            updateFromInputs();
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startCountdown);
+        pauseBtn.addEventListener('click', pauseCountdown);
+        resetBtn.addEventListener('click', resetCountdown);
+        minutesInput.addEventListener('input', updateFromInputs);
+        secondsInput.addEventListener('input', updateFromInputs);
+
+        // Style pour l'animation de pulsation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialisation
+        updateDisplay();
+    </script>
 </body>
 </html>
